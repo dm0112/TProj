@@ -4,9 +4,45 @@ console.log("hello");
 let textArea = document.getElementById("ourText");
 document.getElementById("submitourText").addEventListener("click",function(){
 sendText(textArea.value);
-
+// crawCraw();
 })
+// async function crawCraw(){
+// //     var request = new XMLHttpRequest();
+// // request.open("GET", "https://bypasscors.herokuapp.com/api/?url=" + encodeURIComponent("https://duckduckgo.com/html/?q=stack+overflow"), true);  // last parameter must be true
+// // request.responseType = "document";
+// // request.onload = function (e) {
+// //   if (request.readyState === 4) {
+// //     if (request.status === 200) {
+// //       var a = request.responseXML.querySelector("div.result:nth-child(1) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)");
+// //       console.log(a.href);
+// //       document.body.appendChild(a);
+// //     } else {
+// //       console.error(request.status, request.statusText);
+// //     }
+// //   }
+// // };
+// // request.onerror = function (e) {
+// //   console.error(request.status, request.statusText);
+// // };
+// // request.send(null);
 
+//     data = "https://www.adelapopescu.eu/vacanta-cu-doi-copii-in-sri-lank/";
+//     const proxyurl = "https://cors-anywhere.herokuapp.com/";
+//     fetch(proxyurl + data)
+//     .then(response=>response.text())
+//     .then(function(contents){
+//         console.log(contents);
+//         var obj={};
+//         try{
+//             obj=JSON.parse(contents) ;
+//         }catch(err){
+//             errorfn();
+//             return;
+//         }
+//     })
+//     .catch(() => console.log("Cannot access " + data + " response. Blocked by browser?"))
+
+// }
 async function sendText(text){
   
     data = "https://relate.racai.ro/index.php?teprolinws&path=teprolinws&text="+text+"&&exec=";
@@ -29,16 +65,19 @@ async function sendText(text){
         for (let i=0;i<obj["teprolin-result"]["tokenized"].length;i++)
         parsedLocations=parsedLocations.concat(parseWords(obj["teprolin-result"]["tokenized"][i]));
        // console.log(obj["teprolin-result"]["tokenized"][4]);
+       //console.log(parsedLocations);
         let wanted = [
             "raul","paraul","izvorul","marea","lacul","cascada","Raul","Paraul","Cascada","Izvorul","Marea","Lacul",
             "strada","aleea","calea","soseaua","Strada","Aleea","Calea","Soseaua","str.","str","Str","Bulevardul","bulevardul","drum","Drum","Muzeul","muzeul"
             ,"Biserica","Manastirea","Mitropolia","Catedrala","biserica","manastirea","mitropolia","catedrala"
         ]
         let temp = [];
+        let temp2= getThemCities(textArea.value);     
+        // console.log(temp2);
         for(let i=0;i<parsedLocations.length;i++)
         if(includeMoreThenOne(parsedLocations[i],wanted))
         temp.push(parsedLocations[i]);
-
+        
 //      console.log(temp);
         parsedLocations=temp; 
         
@@ -50,6 +89,15 @@ async function sendText(text){
     .catch(() => console.log("Cannot access " + data + " response. Blocked by browser?"))
  
 
+}
+function getThemCities(text){
+    let temp2=[];
+    for(let i = 0; i<text.split(" ").length;i++){
+        if(text.split(" ")[i].charCodeAt(0)>=65 && 
+        text.split(" ")[i].charCodeAt(0)<=90)
+        temp2.push(text.split(" ")[i]);
+    }
+    return temp2;
 }
 function allWordsAreInUpper(location){
 
