@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    
+    <title>tiln</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="comenzi">
+    <button id="myBtn" >Commands</button>
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        
+      
+    <div>
+    <b>Start</b>
+    <select id="start">
+
+    </select>
+    
+    <b>Locatii</b> 
+    <select multiple id="waypoints">
+     
+    </select> 
+    
+    <b>Finish</b>
+    <select id="end">
+       
+    </select>
+    
+      <input type="submit" id="submit" class="buttons">
+    </div>
+    <textarea id="ourText" rows="4" cols="50" class = "ourT">
+Biserica din cărămidă de la sfârșitul secolului XV-lea, de lângă Palatul Culturii, este Biserica Sf. Nicolae… O plimbare de 5 minute spre nord, pe Bulevardul Ștefan cel Mare, te duce la Biserica Trei Ierarhi (str. Ștefan cel Mare și Sfânt nr. 28)... Biserica Armenească de la începutul secolului XIX-lea se află pe Strada Armenească, o plimbare de 8 minute la nord-est de Piața Palatului, pe Strada Costache Negri… Mergi puțin mai departe spre nord, până pe Strada Cuza Vodă nr. 51, unde se înalță Mănăstirea Golia.
+        </textarea>
+      <textarea id="city" rows="1" cols="20" class = "ourT">
+        Iasi
+      </textarea>
+    <button value="Submit Text" id="submitourText" class="buttons">Submit Text</button>
+    </div>
+  </div>
+</div>
+    <script>
+      function initMap() {
+        var directionsService = new google.maps.DirectionsService;
+        var directionsRenderer = new google.maps.DirectionsRenderer;
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 7,
+          center: {lat: 46.2275658, lng: 25.5325832}
+        });
+        directionsRenderer.setMap(map);
+
+        document.getElementById('submit').addEventListener('click', function() {
+          calculateAndDisplayRoute(directionsService, directionsRenderer);
+        });
+      }
+//       function dete(){
+// var request = {
+//     query: 'Piata Unirii',
+//     fields: ['name', 'geometry'],
+//   };
+
+//   var service = new google.maps.places.PlacesService(map);
+//   console.log(service);
+//   service.findPlaceFromQuery(request, function(results, status) {
+//     if (status === google.maps.places.PlacesServiceStatus.OK) {
+//       for (var i = 0; i < results.length; i++) {
+//         createMarker(results[i]);
+//       }}})
+//       return results;
+//     }
+    
+      function calculateAndDisplayRoute(directionsService, directionsRenderer) {
+        var waypts = [];
+        let city = document.getElementById("city").value;
+        var checkboxArray = document.getElementById('waypoints');
+        for (var i = 0; i < checkboxArray.length; i++) {
+          if (checkboxArray.options[i].selected) {
+            waypts.push({
+              location: checkboxArray[i].value+" "+city,
+              stopover: true
+            });
+          }
+        }
+
+        directionsService.route({
+          origin: document.getElementById('start').value+" "+city,
+          destination: document.getElementById('end').value+" "+city,
+          waypoints: waypts,
+          optimizeWaypoints: true,
+          travelMode: 'WALKING'
+        }, function(response, status) {
+          if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+            var route = response.routes[0];
+           
+       
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+      }
+    
+    </script>
+    <!-- <script>
+      var map;
+var service;
+var infowindow;
+
+function initMap() {
+  var sydney = new google.maps.LatLng(-33.867, 151.195);
+
+  infowindow = new google.maps.InfoWindow();
+
+  map = new google.maps.Map(
+      document.getElementById('map'), {center: sydney, zoom: 15});
+
+  var request = {
+    query: 'Nicolae Iorga',
+    fields: ['name', 'geometry'],
+  };
+
+  var service = new google.maps.places.PlacesService(map);
+
+  service.findPlaceFromQuery(request, function(results, status) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+      for (var i = 0; i < results.length; i++) {
+        console.log(results[i]);
+        createMarker(results[i]);
+        
+      }
+      
+      map.setCenter(results[0].geometry.location);
+    }
+  });
+  function createMarker(place) {
+        var marker = new google.maps.Marker({
+          map: map,
+          position: place.geometry.location
+        });
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.setContent(place.name);
+          infowindow.open(map, this);
+        });
+      }
+}
+    </script> -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfd3ffkGV6PxFji8lgFgbYKJQb5HG-Z70&callback=initMap&libraries=places">
+    </script>
+    <script src="script.js"></script>
+
+  </body>
+</html>
