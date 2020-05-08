@@ -3,10 +3,10 @@ console.log("hello");
 //sendText("Biserica din cărămidă de la sfârșitul secolului XV-lea, de lângă Palatul Culturii, este Biserica Sf. Nicolae… O plimbare de 5 minute spre nord, pe Bulevardul Ștefan cel Mare, te duce la Biserica Trei Ierarhi (str. Ștefan cel Mare și Sfânt nr. 28)... Biserica Armenească de la începutul secolului XIX-lea se află pe Strada Armenească, o plimbare de 8 minute la nord-est de Piața Palatului, pe Strada Costache Negri… Mergi puțin mai departe spre nord, până pe Strada Cuza Vodă nr. 51, unde se înalță Mănăstirea Golia.");
 let textArea = document.getElementById("ourText");
 document.getElementById("submitourText").addEventListener("click",function(){
-sendText(textArea.value);
+sendText(textArea.value.trim());
 
 })
-crawCraw();
+let txtFromLink = "";
 // //     var request = new XMLHttpRequest();
 // // request.open("GET", "https://bypasscors.herokuapp.com/api/?url=" + encodeURIComponent("https://duckduckgo.com/html/?q=stack+overflow"), true);  // last parameter must be true
 // // request.responseType = "document";
@@ -25,32 +25,81 @@ crawCraw();
 // //   console.error(request.status, request.statusText);
 // // };
 // // request.send(null);
-async function crawCraw(){
-    data = "https://www.adelapopescu.eu/vacanta-cu-doi-copii-in-sri-lank/";
+let parsedText ="";
+async function crawCraw(link){
+    data = link.toString();
     const proxyurl = "https://cors-anywhere.herokuapp.com/";
     fetch(proxyurl + data)
     .then(response=>response.text())
     .then(function(contents){
-        console.log(contents);
-        var obj={};
-        try{
-            obj=JSON.parse(contents) ;
-        }catch(err){
-            errorfn();
-            return;
-        }
-    })
-    .catch(() => console.log("Cannot access " + data + " response. Blocked by browser?"))
+        // console.log(contents);
+        let parser = new DOMParser()
+        let doc;
+        // let parsedText = "";
+        
+        
+            doc = parser.parseFromString(contents, "text/html");
+        
+        for (let i = 0; i<doc["body"].getElementsByTagName("P").length;i++)
+        { element  = doc["body"].getElementsByTagName("P");
+        // console.log(element[i].childNodes.length)
+            // It has at least one
+            
+        if(element[i].innerHTML.charCodeAt(0) >=65 && element[i].innerHTML.charCodeAt(0)<=88){
+            // console.log(element[i].innerHTML ); //luam doar p-uri care incep cu o litera
+            parsedText = parsedText + element[i].innerHTML + " "; // modificat ultima data
+    
+    
+       }
+       
+    
+    }
+    
+    // parsedText.replace("<br>","");
+    
+    parsedText = convertHtmlToText(parsedText);
+ 
+    
 
+
+
+    function convertHtmlToText(str)
+    {
+       str = str.toString();
+       
+    //    str.replace(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, '');
+        str = str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, ' ');
+        str= str.replace(/<[^>]*(>|$)|&nbsp;|&zwnj;|&raquo;|&laquo;|&gt;/g, ' ');
+        return str;
+    }
+    
+    //   console.log(txtFromLink);
+    
+    
+    })
+    .catch(() => console.log("Cannot access " + " response. Blocked by browser?"))
+    return parsedText;
 }
-async function sendText(text){
-  
+// crawCraw("https://www.adelapopescu.eu/viata-inainte-si-dupa-aparitia-copilului-diminetile/").then(value => console.log(value));
+// doesn't work
+async function sendText(textOrLink){
+    let text= "" ;
+    if ((textOrLink.search("https://") || textOrLink.search("http://")) && textOrLink.split(' ').length == 1)
+       { //// todo daca este URL sa apeleze functia si raspunsul trebuie pus in variabila text
+        
+        
+        
+    }
+    else {text = textOrLink;
+        console.log("dafq");
+    }
+    // console.log(retur);
     data = "https://relate.racai.ro/index.php?teprolinws&path=teprolinws&text="+text+"&&exec=";
     const proxyurl = "https://cors-anywhere.herokuapp.com/";
     fetch(proxyurl + data) 
     .then(response => response.text())
     .then(function(contents){
-        console.log(contents);
+        // console.log(contents);
         var obj={};
         try{
             obj=JSON.parse(contents) ;
