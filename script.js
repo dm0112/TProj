@@ -63,7 +63,7 @@ function sendText(textOrLink){
         crawl(text);
     }
     
- 
+ // test
 }
 function crawl(text){
     // console.log(retur);
