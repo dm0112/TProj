@@ -4,7 +4,7 @@ console.log("hello");
 let textArea = document.getElementById("ourText");
 document.getElementById("submitourText").addEventListener("click",function(){
 sendText(textArea.value.trim());
-
+ 
 })
 let txtFromLink = "";
 // //     var request = new XMLHttpRequest();
@@ -25,78 +25,51 @@ let txtFromLink = "";
 // //   console.error(request.status, request.statusText);
 // // };
 // // request.send(null);
-let parsedText ="";
-async function crawCraw(link){
-    data = link.toString();
-    const proxyurl = "https://cors-anywhere.herokuapp.com/";
-    fetch(proxyurl + data)
-    .then(response=>response.text())
-    .then(function(contents){
-        // console.log(contents);
-        let parser = new DOMParser()
-        let doc;
-        // let parsedText = "";
-        
-        
-            doc = parser.parseFromString(contents, "text/html");
-        
-        for (let i = 0; i<doc["body"].getElementsByTagName("P").length;i++)
-        { element  = doc["body"].getElementsByTagName("P");
-        // console.log(element[i].childNodes.length)
-            // It has at least one
-            
-        if(element[i].innerHTML.charCodeAt(0) >=65 && element[i].innerHTML.charCodeAt(0)<=88){
-            // console.log(element[i].innerHTML ); //luam doar p-uri care incep cu o litera
-            parsedText = parsedText + element[i].innerHTML + " "; // modificat ultima data
-    
-    
-       }
-       
-    
-    }
-    
-    // parsedText.replace("<br>","");
-    
-    parsedText = convertHtmlToText(parsedText);
- 
-    
 
 
 
-    function convertHtmlToText(str)
-    {
-       str = str.toString();
-       
-    //    str.replace(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, '');
-        str = str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, ' ');
-        str= str.replace(/<[^>]*(>|$)|&nbsp;|&zwnj;|&raquo;|&laquo;|&gt;/g, ' ');
-        return str;
-    }
-    
-    //   console.log(txtFromLink);
-    
-    
-    })
-    .catch(() => console.log("Cannot access " + " response. Blocked by browser?"))
-    return parsedText;
-}
-// crawCraw("https://www.adelapopescu.eu/viata-inainte-si-dupa-aparitia-copilului-diminetile/").then(value => console.log(value));
+// crawCraw("https://www.adelapopescu.eu/viata-inainte-si-dupa-aparitia-copilului-diminetile/");
 // doesn't work
-async function sendText(textOrLink){
+// crawCraw();
+// crawCraw("https://www.adelapopescu.eu/viata-inainte-si-dupa-aparitia-copilului-diminetile/");
+function sendText(textOrLink){
     let text= "" ;
     if ((textOrLink.search("https://") || textOrLink.search("http://")) && textOrLink.split(' ').length == 1)
        { //// todo daca este URL sa apeleze functia si raspunsul trebuie pus in variabila text
-        
-        
+        // text = await crawCraw(textOrLink);
+        let parsedText="";
+        const proxyurl = "https://cors-anywhere.herokuapp.com/";
+        const fetchPromise = fetch(proxyurl+textOrLink);
+        fetchPromise.then(response => {
+            return response.text();
+        }).then(contents => {
+            let parser = new DOMParser()
+            let doc;
+                doc = parser.parseFromString(contents, "text/html");
+            for (let i = 0; i<doc["body"].getElementsByTagName("P").length;i++)
+            { element  = doc["body"].getElementsByTagName("P");
+            if(element[i].innerHTML.charCodeAt(0) >=65 && element[i].innerHTML.charCodeAt(0)<=88){
+                parsedText = parsedText + element[i].innerHTML + " ";
+           }
+        }
+        parsedText = convertHtmlToText(parsedText);
+        text=parsedText;
+        textArea.innerText=text;
+        crawl(text);
+        });
         
     }
     else {text = textOrLink;
-        console.log("dafq");
+        crawl(text);
     }
+    
+ 
+}
+function crawl(text){
     // console.log(retur);
     data = "https://relate.racai.ro/index.php?teprolinws&path=teprolinws&text="+text+"&&exec=";
     const proxyurl = "https://cors-anywhere.herokuapp.com/";
-    fetch(proxyurl + data) 
+    fetch(proxyurl + data)
     .then(response => response.text())
     .then(function(contents){
         // console.log(contents);
@@ -108,7 +81,7 @@ async function sendText(textOrLink){
             return;
         }
         //var conll=JSON2CONLLU(obj["teprolin-result"]["tokenized"],obj["teprolin-result"]["sentences"]);
-
+ 
         let parsedLocations=[];
         //console.log(words);
         for (let i=0;i<obj["teprolin-result"]["tokenized"].length;i++)
@@ -121,35 +94,43 @@ async function sendText(textOrLink){
             ,"Biserica","Manastirea","Mitropolia","Catedrala","biserica","manastirea","mitropolia","catedrala"
         ]
         let temp = [];
-        let temp2= getThemCities(textArea.value);     
+        let temp2= getThemCities(textArea.value);    
         // console.log(temp2);
         for(let i=0;i<parsedLocations.length;i++)
         if(includeMoreThenOne(parsedLocations[i],wanted))
         temp.push(parsedLocations[i]);
-        
+       
 //      console.log(temp);
-        parsedLocations=temp; 
-        
-        populateWithLocations(parsedLocations);     
-        
+        parsedLocations=temp;
+       
+        populateWithLocations(parsedLocations);    
+       
         console.log(parsedLocations);
-        
+       
     })
     .catch(() => console.log("Cannot access " + data + " response. Blocked by browser?"))
  
+}
 
+
+function convertHtmlToText(str)
+{
+   str = str.toString();
+    str = str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, ' ');
+    str= str.replace(/<[^>]*(>|$)|&nbsp;|&zwnj;|&raquo;|&laquo;|&gt;/g, ' ');
+    return str;
 }
 function getThemCities(text){
     let temp2=[];
     for(let i = 0; i<text.split(" ").length;i++){
-        if(text.split(" ")[i].charCodeAt(0)>=65 && 
+        if(text.split(" ")[i].charCodeAt(0)>=65 &&
         text.split(" ")[i].charCodeAt(0)<=90)
         temp2.push(text.split(" ")[i]);
     }
     return temp2;
 }
 function allWordsAreInUpper(location){
-
+ 
     for(let i=1;i<location.split(" ").length;i++){
         //console.log(location.split(" "));
         if(!location.split(" ")[i].match(/[A-Z]/)){
@@ -161,13 +142,13 @@ function allWordsAreInUpper(location){
 }
 function includeMoreThenOne(location,words){
     let ok = false;
-    
+   
     for(let i=0;i<words.length;i++)
             if(location.indexOf(words[i]) >= 0)
             {ok=true;
-            
+           
             break;
-        
+       
     }
     if(allWordsAreInUpper(location))
     ok=true;
@@ -177,7 +158,7 @@ function parseWords(words2){
     let i=1;
     var words=[];
     while(getAllWhoHaveChunk("Np#"+i,words2) !=""){
-        
+       
         let word =getAllWhoHaveChunk("Np#"+i,words2);
         if(word.split(" ").length>2)words.push(word);
         i++;
@@ -194,11 +175,11 @@ function getAllWhoHaveChunk(text,list){
        }
    }
    return word;
-
+ 
 }
 function populateWithLocations(locations){
     let where = ["start","end","waypoints"];
-    
+   
         where.forEach(element => {
             locations.forEach(location =>{
                 let option1 = document.createElement("option");
@@ -209,31 +190,31 @@ function populateWithLocations(locations){
             });
         });
         document.getElementById("end").selectedIndex=document.getElementById("end").options.length-1;
-        
+       
 }
-
-
-
-
+ 
+ 
+ 
+ 
 // Get the modal
 var modal = document.getElementById("myModal");
-
+ 
 // Get the button that opens the modal
 var btn = document.getElementById("myBtn");
-
+ 
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
-
+ 
 // When the user clicks on the button, open the modal
 btn.onclick = function() {
   modal.style.display = "block";
 }
-
+ 
 // When the user clicks on <span> (x), close the modal
 span.onclick = function() {
   modal.style.display = "none";
 }
-
+ 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
   if (event.target == modal) {
