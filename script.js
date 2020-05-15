@@ -2,37 +2,19 @@ console.log("hello");
 //sendText("Unul dintre cele mai populare simboluri ale orașului Iași este Palatul Culturii. Opera arhitectului I.D. Berindei a fost realizată în perioada 1906 – 1925, fiind inaugurată de regele Ferdinand al României.Această clădire impresionantă este sediul a numeroase instituții culturale de prestigiu din acest oraș și a fost pusă în valoare prin recenta sa reabilitare.În cadrul Palatului Culturii din Iași vei descoperi patru muzee, care te vor ajuta să înțelegi mai bine istoria și cultura acestor meleaguri: Muzeul de Istorie al Moldovei, Muzeul Etnografic, Muzeul de Artă și Muzeul Științei și Tehnologiei Ștefan Procopiu.");
 //sendText("Biserica din cărămidă de la sfârșitul secolului XV-lea, de lângă Palatul Culturii, este Biserica Sf. Nicolae… O plimbare de 5 minute spre nord, pe Bulevardul Ștefan cel Mare, te duce la Biserica Trei Ierarhi (str. Ștefan cel Mare și Sfânt nr. 28)... Biserica Armenească de la începutul secolului XIX-lea se află pe Strada Armenească, o plimbare de 8 minute la nord-est de Piața Palatului, pe Strada Costache Negri… Mergi puțin mai departe spre nord, până pe Strada Cuza Vodă nr. 51, unde se înalță Mănăstirea Golia.");
 let textArea = document.getElementById("ourText");
+let waypointse = document.getElementById("waypoints");
+let starte = document.getElementById("start");
+let ende = document.getElementById("end");
 document.getElementById("submitourText").addEventListener("click",function(){
-sendText(textArea.value.trim());
+crawCraw(textArea.value.trim());
  
 })
-let txtFromLink = "";
-// //     var request = new XMLHttpRequest();
-// // request.open("GET", "https://bypasscors.herokuapp.com/api/?url=" + encodeURIComponent("https://duckduckgo.com/html/?q=stack+overflow"), true);  // last parameter must be true
-// // request.responseType = "document";
-// // request.onload = function (e) {
-// //   if (request.readyState === 4) {
-// //     if (request.status === 200) {
-// //       var a = request.responseXML.querySelector("div.result:nth-child(1) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)");
-// //       console.log(a.href);
-// //       document.body.appendChild(a);
-// //     } else {
-// //       console.error(request.status, request.statusText);
-// //     }
-// //   }
-// // };
-// // request.onerror = function (e) {
-// //   console.error(request.status, request.statusText);
-// // };
-// // request.send(null);
-
-
 
 // crawCraw("https://www.adelapopescu.eu/viata-inainte-si-dupa-aparitia-copilului-diminetile/");
 // doesn't work
 // crawCraw();
 // crawCraw("https://www.adelapopescu.eu/viata-inainte-si-dupa-aparitia-copilului-diminetile/");
-function sendText(textOrLink){
+function crawCraw(textOrLink){
     let text= "" ;
     if ((textOrLink.search("https://") || textOrLink.search("http://")) && textOrLink.split(' ').length == 1)
        { //// todo daca este URL sa apeleze functia si raspunsul trebuie pus in variabila text
@@ -45,27 +27,67 @@ function sendText(textOrLink){
         }).then(contents => {
             let parser = new DOMParser()
             let doc;
+            
                 doc = parser.parseFromString(contents, "text/html");
-            for (let i = 0; i<doc["body"].getElementsByTagName("P").length;i++)
-            { element  = doc["body"].getElementsByTagName("P");
-            if(element[i].innerHTML.charCodeAt(0) >=65 && element[i].innerHTML.charCodeAt(0)<=88){
+            for (let i = 0; i<doc["body"].getElementsByTagName("p").length;i++) { 
+                element  = doc["body"].getElementsByTagName("p");
+                // element = element + doc["body"].getElementsByTagName("p");
+                // console.log(element[i].innerHTML);
+                
+            if((element[i].innerHTML.charCodeAt(0) >=65 && element[i].innerHTML.charCodeAt(0)<=90) || element[i].innerHTML[0]=="•"){
                 parsedText = parsedText + element[i].innerHTML + " ";
            }
         }
+        // console.log(parsedText);
+        // alert("ok");
         parsedText = convertHtmlToText(parsedText);
-        text=parsedText;
-        textArea.innerText=text;
-        crawl(text);
+        // console.log(parsedText);
+        text=parsedText.trim();
+        textArea.value=text;
+        // console.log(text);
+        // alert("ok1");
+        let sentecesList = text.match( /[^\.!\?]+[\.!\?]+|[^\.!\?]+/g );
+        let oneBigParagraph = "";
+        for(let i=0; i<sentecesList.length;i++){
+           if(oneBigParagraph.length>200) {         //cate caractere sa trimit cu request-ul, dupa ~500 eroare
+           console.log(oneBigParagraph);    
+            sendText(oneBigParagraph);
+                oneBigParagraph = sentecesList[i]; // salvam proprozitia curent
+                
+            }
+            else {
+                oneBigParagraph = oneBigParagraph + sentecesList[i]; //construim pentru send
+            }
+
+
+
+        }
+        // sendText(text);
         });
         
     }
     else {text = textOrLink;
-        crawl(text);
+        let sentecesList = text.match( /[^\.!\?]+[\.!\?]+|[^\.!\?]+/g );
+        let oneBigParagraph = "";
+        for(let i=0; i<sentecesList.length;i++){
+           if(oneBigParagraph.length>200) {         //cate caractere sa trimit cu request-ul, dupa ~500 eroare
+                sendText(oneBigParagraph);
+                oneBigParagraph = sentecesList[i]; // salvam proprozitia curent
+                // console.log(oneBigParagraph);
+            }
+            else {
+                oneBigParagraph = oneBigParagraph + sentecesList[i]; //construim pentru send
+                
+            }
+
+
+        // sendText(text);
+    }
     }
     
  // test
 }
-function crawl(text){
+function sendText(text){
     // console.log(retur);
     data = "https://relate.racai.ro/index.php?teprolinws&path=teprolinws&text="+text+"&&exec=";
     const proxyurl = "https://cors-anywhere.herokuapp.com/";
@@ -94,29 +116,91 @@ function crawl(text){
             ,"Biserica","Manastirea","Mitropolia","Catedrala","biserica","manastirea","mitropolia","catedrala"
         ]
         let temp = [];
-        let temp2= getThemCities(textArea.value);    
-        // console.log(temp2);
-        for(let i=0;i<parsedLocations.length;i++)
-        if(includeMoreThenOne(parsedLocations[i],wanted))
-        temp.push(parsedLocations[i]);
+        
+        
+        
+        
+        parsedLocations=remakeListWithoutOnlyLower(parsedLocations);
+        parsedLocations = checkLowerWords(parsedLocations);
+
+        // for(let i=0;i<parsedLocations.length;i++)
+        // if(wMoreThenOne(parsedLocations[i],wanted))
+        // temp.push(parsedLocations[i]);
        
-//      console.log(temp);
-        parsedLocations=temp;
-       
-        populateWithLocations(parsedLocations);    
-       
-        console.log(parsedLocations);
-       
+        // // console.log(temp);
+        // parsedLocations=temp;
+
+         populateWithLocations(parsedLocations);
+         console.log(parsedLocations);
     })
     .catch(() => console.log("Cannot access " + data + " response. Blocked by browser?"))
  
 }
 
+function checkLowerWords(parsedLocations){
+    let newList = [];
+    let wanted = [
+        "raul","paraul","izvorul","marea","lacul","cascada","Raul","Paraul","Cascada","Izvorul","Marea","Lacul",
+        "strada","aleea","calea","soseaua","Strada","Aleea","Calea","Soseaua","str.","str","Str","Bulevardul","bulevardul","drum","Drum","Muzeul","muzeul"
+        ,"Biserica","Manastirea","Mitropolia","Catedrala","biserica","manastirea","mitropolia","catedrala", "plaja", "Baia","satul","judetul", "orasul"
+    ]
+    let notWanted = ["meu", "mea", "mei", "tau","tai", "ma", "lor",
+    "cu", "in", "la", "pe", "per", "pro", "sub", "lei", "jos"
+    ]
+    let notWantedBig = ["UE", "UV","US"]
+    for(let j = 0 ; j<parsedLocations.length;j++){
+        let ffs = parsedLocations[j].trim();
+        let lowWordsCounter=0; // un fel de heuristic
+        let temp = ffs.split(' ').length - 1;
+    for( let i = 1 ; i < ffs.split(' ').length;i++){
+    if(ffs.split(' ')[i].charCodeAt(0)>=97 && ffs.split(' ')[i].charCodeAt(0)<=122){ 
+    lowWordsCounter +=1;
+        if(ffs.split(' ')[i].length>3 && ffs.split(' ')[0]!="sudul" && ffs.split(' ')[0]!="nordul" && ffs.split(' ')[0]!="vestul" && 
+        ffs.split(' ')[0]!="estul" && !wanted.includes(ffs.split(' ')[0]) )
+        lowWordsCounter +=1;
+        if(notWanted.includes(ffs.split(' ')[i]))
+        lowWordsCounter +=2; // daca exista un cuvant de lungime mai mare de 3 incepand cu litera mica sau ultimul cuvant incepe cu litera mica
+        if(i==temp)
+        lowWordsCounter +=1;
+    }
+    else {
+        if(notWantedBig.includes(ffs.split(' ')[i]))
+        lowWordsCounter+=2;
+    }
+
+    
+   
+
+}
+
+if(lowWordsCounter<2)
+newList.push(ffs);
+// console.log(ffs);  
+}
+            return newList;
+}
+
+function remakeListWithoutOnlyLower(parsedLocations){
+    pLocTemp =[];
+        for(let i=0;i<parsedLocations.length;i++){
+        if(checkIfAllLower(parsedLocations[i]))
+        pLocTemp.push(parsedLocations[i]);
+        }
+    return pLocTemp;
+}
+
+function checkIfAllLower(sen){
+    ffs = sen.trim();
+    for( let i = 0 ; i < ffs.split(' ').length;i++)
+    if(ffs.split(' ')[i].charCodeAt(0)>=65 && ffs.split(' ')[i].charCodeAt(0)<=90)
+    return true;
+    return false;
+}
 
 function convertHtmlToText(str)
 {
    str = str.toString();
-    str = str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, ' ');
+    str = str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
     str= str.replace(/<[^>]*(>|$)|&nbsp;|&zwnj;|&raquo;|&laquo;|&gt;/g, ' ');
     return str;
 }
@@ -136,10 +220,10 @@ function allWordsAreInUpper(location){
         if(!location.split(" ")[i].match(/[A-Z]/)){
         //console.log(location.split(" ")[i]);
         return false;
-}
-}
+}}
     return true;
 }
+
 function includeMoreThenOne(location,words){
     let ok = false;
    
