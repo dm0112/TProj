@@ -23,7 +23,7 @@
     </select>
     
     <b>Locatii</b> 
-    <select multiple id="waypoints">
+    <select multiple id="waypoints" name="sortfilter">
      
     </select> 
     
@@ -39,52 +39,106 @@ Biserica din cărămidă de la sfârșitul secolului XV-lea, de lângă Palatul 
         </textarea>
         <!-- <textarea id="ourText" rows="4" cols="50" class = "ourT">
           https://www.adelapopescu.eu/viata-inainte-si-dupa-aparitia-copilului-diminetile/                  </textarea> -->
-      <textarea id="city" rows="1" cols="20" class = "ourT" placeholder="Oras (Optional)" ></textarea>
+      <textarea id="city" rows="1" cols="20" class = "ourT" name="placeholderToChange" placeholder="Oras (Optional)" ></textarea>
       
     <button value="Submit Text" id="submitourText" class="buttons">Submit Text/ Link</button>
     </div>
   </div>
 </div>
+
+
+  <!-- <script>
+    
+        
+        var geocoder = new google.maps.Geocoder();
+
+       
+          geocodeAddress(geocoder, map);
+        
+      
+
+      function geocodeAddress(geocoder, address) {
+        var address = "Giurcani";
+        geocoder.geocode({'address': address}, function(results, status) {
+          if (status === 'OK') {
+            
+            console.log(results[0]["address_components"][2]["long_name"]);
+          } else {
+            alert('Geocode was not successful for the following reason: ' + status);
+          }
+        });
+      }
+  </script> -->
+  
+
+
+
     <script>
       function initMap() {
         var directionsService = new google.maps.DirectionsService;
         var directionsRenderer = new google.maps.DirectionsRenderer;
+        var geocoder = new google.maps.Geocoder;
         var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 7,
           center: {lat: 46.2275658, lng: 25.5325832}
         });
         directionsRenderer.setMap(map);
 
+        
+      
+
         document.getElementById('submit').addEventListener('click', function() {
-          calculateAndDisplayRoute(directionsService, directionsRenderer);
+          // geocodeAddress(geocoder,"Giurcani");
+          // calculateAndDisplayRoute(directionsService, directionsRenderer);
+          setTimeout(() => {
+            calculateAndDisplayRoute(directionsService, directionsRenderer);
+          }, 2000);
+          getFrequencyOfThemAll();
+          
+
           modal.style.display = "none";
         });
       }
-//       function dete(){
-// var request = {
-//     query: 'Piata Unirii',
-//     fields: ['name', 'geometry'],
-//   };
+      
+      let citiesList = [];
+      var getMax1 = function (someMap) { // entried maxim oras
+      var maxValue;
+      for (var [key, value] of someMap) {
+         maxValue = (!maxValue || maxValue < value) ? value : maxValue;
 
-//   var service = new google.maps.places.PlacesService(map);
-//   console.log(service);
-//   service.findPlaceFromQuery(request, function(results, status) {
-//     if (status === google.maps.places.PlacesServiceStatus.OK) {
-//       for (var i = 0; i < results.length; i++) {
-//         createMarker(results[i]);
-//       }}})
-//       return results;
-//     }
-    
+      }
+      return maxValue;
+      }
+      function getKey(map,val) { // numele orasului
+       return [...map].find(([key, value]) => val === value)[0];
+      }
       function calculateAndDisplayRoute(directionsService, directionsRenderer) {
+        // for(let i =0 ; i< citiesList.length;i++)
+        // console.log(citiesList[i]); 
+        // console.log(map.entries());
+        // console.log(getMax1(map));
+        // console.log(getKey(map,getMax1(map)));
+        
+        
+
+        
         var waypts = [];
         let city = document.getElementById("city").value;
+        let cityArea = document.getElementById("city");
         var checkboxArray = document.getElementById('waypoints');
         for (var i = 0; i < checkboxArray.length; i++) {
           if (checkboxArray.options[i].selected) {
             if(city.trim()!="")
             city = " " + city;
-            else city="";
+            else {
+              const map = citiesList.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map()); // calculam orasul in functie de maximul locurilor care sunt gasite in acelasi oras
+              
+              city = getKey(map,getMax1(map));
+              console.log(city);
+              console.log(getMax1(map));
+              cityArea.innerHTML = city;
+
+          }
             waypts.push({
               location: checkboxArray[i].value+city,
               stopover: true
@@ -109,55 +163,55 @@ Biserica din cărămidă de la sfârșitul secolului XV-lea, de lângă Palatul 
           }
         });
       }
-    
-    </script>
-    
-    
-    
-    <!-- <script>
-      var map;
-var service;
-var infowindow;
+        
+        async function getFrequencyOfThemAll(){
+         let locationList = [];
+         
+         let normalListCities = [];
+         var checkboxArray = document.getElementById('waypoints');
+        for (var i = 0; i < checkboxArray.length; i++) {
+          if (checkboxArray.options[i].selected) {
+            locationList.push(checkboxArray[i].value);
+          }}
+          locationList.push(document.getElementById('start').value);
+          locationList.push(document.getElementById('end').value);
+          // console.log(locationList);
+          for(let i=0 ;i<locationList.length;i++){
+          let res = geocodeAddress(locationList[i]).then(function(result){
+            citiesList.push(result.trim());
+          });
+          
+          
+        }
+        
+        // console.log(Object.keys(citiesList));
+        // for(let i =0 ; i< citiesList.length;i++)
+        // console.log(citiesList[1]);
 
-function initMap() {
-  var sydney = new google.maps.LatLng(-33.867, 151.195);
-
-  infowindow = new google.maps.InfoWindow();
-
-  map = new google.maps.Map(
-      document.getElementById('map'), {center: sydney, zoom: 15});
-
-  var request = {
-    query: 'Nicolae Iorga',
-    fields: ['name', 'geometry'],
-  };
-
-  var service = new google.maps.places.PlacesService(map);
-
-  service.findPlaceFromQuery(request, function(results, status) {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      for (var i = 0; i < results.length; i++) {
-        console.log(results[i]);
-        createMarker(results[i]);
         
       }
-      
-      map.setCenter(results[0].geometry.location);
-    }
-  });
-  function createMarker(place) {
-        var marker = new google.maps.Marker({
-          map: map,
-          position: place.geometry.location
-        });
 
-        google.maps.event.addListener(marker, 'click', function() {
-          infowindow.setContent(place.name);
-          infowindow.open(map, this);
-        });
+ 
+      /////////////start of geocoder
+
+      async function geocodeAddress(locationList){
+       let rawCit ="https://maps.googleapis.com/maps/api/geocode/json?";
+       apikey="AIzaSyBfd3ffkGV6PxFji8lgFgbYKJQb5HG-Z70";
+       onlyLoc = `address=${locationList}&key=${apikey}&components=country:RO`;
+       const fetchPromise = await fetch(rawCit+onlyLoc);
+       if(fetchPromise.status ==200){
+         let json = await fetchPromise.json();
+         return (json['results'][0]['address_components'][2]['long_name']).trim();
+       }
+       throw new Error(res.status);
       }
-}
-    </script> -->
+      
+///// ----end of geocoder
+
+    </script>
+    
+  
+  
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBfd3ffkGV6PxFji8lgFgbYKJQb5HG-Z70&callback=initMap&libraries=places">
     </script>

@@ -5,6 +5,8 @@ let textArea = document.getElementById("ourText");
 let waypointse = document.getElementById("waypoints");
 let starte = document.getElementById("start");
 let ende = document.getElementById("end");
+var globalCounterPara = 0;
+var alreadyUsed= [];
 document.getElementById("submitourText").addEventListener("click",function(){
 crawCraw(textArea.value.trim());
  
@@ -53,20 +55,25 @@ function crawCraw(textOrLink){
            console.log(oneBigParagraph);    
             sendText(oneBigParagraph);
                 oneBigParagraph = sentecesList[i]; // salvam proprozitia curent
-                
+                globalCounterPara++;
             }
             else {
                 oneBigParagraph = oneBigParagraph + sentecesList[i]; //construim pentru send
+                
             }
 
 
 
         }
+        if(oneBigParagraph.length>5)
+        sendText(oneBigParagraph);
         // sendText(text);
+        
         });
         
     }
     else {text = textOrLink;
+        
         let sentecesList = text.match( /[^\.!\?]+[\.!\?]+|[^\.!\?]+/g );
         let oneBigParagraph = "";
         for(let i=0; i<sentecesList.length;i++){
@@ -74,15 +81,20 @@ function crawCraw(textOrLink){
                 sendText(oneBigParagraph);
                 oneBigParagraph = sentecesList[i]; // salvam proprozitia curent
                 // console.log(oneBigParagraph);
+                globalCounterPara++;
             }
             else {
                 oneBigParagraph = oneBigParagraph + sentecesList[i]; //construim pentru send
                 
             }
+            
 
 
         // sendText(text);
     }
+        if(oneBigParagraph.length>5)
+        sendText(oneBigParagraph);
+        // console.log(oneBigParagraph);
     }
     
  // test
@@ -124,7 +136,7 @@ function sendText(text){
         parsedLocations = checkLowerWords(parsedLocations);
 
         // for(let i=0;i<parsedLocations.length;i++)
-        // if(wMoreThenOne(parsedLocations[i],wanted))
+        // if(includeMoreThenOne(parsedLocations[i],wanted))
         // temp.push(parsedLocations[i]);
        
         // // console.log(temp);
@@ -132,6 +144,10 @@ function sendText(text){
 
          populateWithLocations(parsedLocations);
          console.log(parsedLocations);
+         document.getElementById("submitourText").innerHTML="Remaining requests: " + --globalCounterPara;
+        //  console.log(globalCounterPara);
+         if(globalCounterPara<=0)
+         document.getElementById("submitourText").innerHTML="SUBMIT TEXT/ LINK";
     })
     .catch(() => console.log("Cannot access " + data + " response. Blocked by browser?"))
  
@@ -266,17 +282,32 @@ function populateWithLocations(locations){
    
         where.forEach(element => {
             locations.forEach(location =>{
-                let option1 = document.createElement("option");
-                option1.setAttribute("value",location);
-                // if(element=="waypoints")option1.setAttribute("selected","true");
-                option1.text=location;
-                document.getElementById(element).appendChild(option1);
+                if(!alreadyUsed.includes(location)){
+                // let option1 = document.createElement("option");
+                // option1.setAttribute("value",location);
+                // // if(element=="waypoints")option1.setAttribute("selected","true");
+                // option1.text=location;
+                // document.getElementById(element).appendChild(option1);
+                alreadyUsed.push(location);}
             });
-        });
-        document.getElementById("end").selectedIndex=document.getElementById("end").options.length-1;
+        });     
+        if(globalCounterPara <=0)
+        populateWithLocationsUnique()
+        
        
 }
- 
+ function populateWithLocationsUnique(){
+    let where = ["start","end","waypoints"];
+    for(let element = 0 ; element< where.length; element++)
+    for(let i = 0 ; i<alreadyUsed.length;i++)
+    {
+    let option1 = document.createElement("option");
+    option1.setAttribute("value",alreadyUsed[i]);
+    // if(element=="waypoints")option1.setAttribute("selected","true");
+    option1.text=alreadyUsed[i];
+    document.getElementById(where[element]).appendChild(option1);}
+document.getElementById("end").selectedIndex=document.getElementById("end").options.length-1;
+ }
  
  
  
