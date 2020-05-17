@@ -258,6 +258,7 @@ function populateWithLocationsUnique() {
             document.getElementById(where[element]).appendChild(option1);
         }
     document.getElementById("end").selectedIndex = document.getElementById("end").options.length - 1;
+    alreadyUsed =[];
 }
 
 

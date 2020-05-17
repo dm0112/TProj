@@ -73,7 +73,7 @@
   .modal-content {
 	background-color: #fefefe;
 	opacity:90%;
-	margin: 15% auto; /* 15% from the top and centered */
+	margin: 5% auto; /* 15% from the top and centered */
 	padding: 20px;
 	border: 1px solid #888;
 	width: 70%; /* Could be more or less, depending on screen size */
@@ -111,3 +111,6 @@
 		cursor: pointer;
 		transition:all 1s;
   }
+#instructions {
+	font-size: 75%;
+}
