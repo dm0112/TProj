@@ -27,7 +27,8 @@ function crawCraw(textOrLink) { //functie responsabila cu luarea textului din bo
                 // element = element + doc["body"].getElementsByTagName("p");
                 // console.log(element[i].innerHTML);
 
-                if ((element[i].innerHTML.charCodeAt(0) >= 65 && element[i].innerHTML.charCodeAt(0) <= 90) || element[i].innerHTML[0] == "•") { // luam continutul paragrafelor
+                if ((element[i].innerHTML.charCodeAt(0) >= 65 && element[i].innerHTML.charCodeAt(0) <= 90) || element[i].innerHTML[0] == "•" 
+                || element[i].innerHTML[0]=='"' || element[i].innerHTML[0]=="'") { // luam continutul paragrafelor
                     parsedText = parsedText + element[i].innerHTML + " ";
                 }
             }
