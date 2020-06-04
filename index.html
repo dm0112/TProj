@@ -176,7 +176,7 @@ Biserica din cărămidă de la sfârșitul secolului XV-lea, de lângă Palatul 
 
       async function geocodeAddress(locationList){ //folosing denumirea plain a unei localitati, incercam sa aflam judetul/ comuna
        let rawCit ="https://maps.googleapis.com/maps/api/geocode/json?";
-       apikey="AIzaSyBfd3ffkGV6PxFji8lgFgbYKJQb5HG-Z70";
+       apikey="AIzaSyDbQwa8Na7RhriJdQg3aAoaV-ycziQIsA8";
        onlyLoc = `address=${locationList}&key=${apikey}&components=country:RO`;
        const fetchPromise = await fetch(rawCit+onlyLoc);
        if(fetchPromise.status ==200){
